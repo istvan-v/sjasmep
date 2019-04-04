@@ -61,7 +61,8 @@ void error(char *fout,char *bd,int soort) {
 void WriteDest() {
   if (!desttel) return;
   destlen+=desttel;
-  if(fwrite(destbuf,1,desttel,output)<desttel) error("Write error (disk full?)",0,FATAL);
+  if(fwrite(destbuf,1,desttel,output)<size_t(desttel))
+    error("Write error (disk full?)",0,FATAL);
   desttel=0;
 }
 
@@ -213,7 +214,8 @@ void ListFileSkip(char *line) {
 #endif
   *pp=0; strcat(pp,"~            ");
   if (nEB) error("Internal error lfs",0,FATAL);
-  if (listmacro) strcat(pp,">"); strcat(pp,line); fputs(pline,listfp);
+  if (listmacro) strcat(pp,">");
+  strcat(pp,line); fputs(pline,listfp);
   epadres=adres; eadres=(aint)-1; nEB=0; listdata=0;
 }
 
@@ -417,13 +419,12 @@ void Close() {
 }
 
 Ending ReadFile() {
-  stringlst *ol;
   char *p;
   while ('o') {
     if (!running) return END;
     if (lijst) {
       if (!lijstp) return END;
-      p=strcpy(line,lijstp->string); ol=lijstp; lijstp=lijstp->next;
+      p=strcpy(line,lijstp->string); lijstp=lijstp->next;
     } else {
       if (!fgets(p=line,LINEMAX,input)) error("Unexpected end of file",0,FATAL);
       ++lcurlin; ++curlin;
@@ -440,14 +441,13 @@ Ending ReadFile() {
 }
 
 Ending SkipFile() {
-  stringlst *ol;
   char *p;
   int iflevel=0;
   while ('o') {
     if (!running) return END;
     if (lijst) {
       if (!lijstp) return END;
-      p=strcpy(line,lijstp->string); ol=lijstp; lijstp=lijstp->next;
+      p=strcpy(line,lijstp->string); lijstp=lijstp->next;
     } else {
       if (!fgets(p=line,LINEMAX,input)) error("Unexpected end of file",0,FATAL);
       ++lcurlin; ++curlin;

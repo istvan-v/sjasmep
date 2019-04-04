@@ -10,7 +10,7 @@ OBJECTS  = direct.o loose.o parser.o piz80.o reader.o sjasm.o sjio.o tables.o
 
 BINDIR   = /usr/local/bin
 
-CXXFLAGS = -Wall -O2
+CXXFLAGS = -Wall -Wno-write-strings -Wno-char-subscripts -O2
 ifneq ($(ISMINGW),)
 	CXXFLAGS += -DMINGW
 else

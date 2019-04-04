@@ -39,7 +39,7 @@ funtabcls z80funtab;
 void piZ80() {
   char *n;
   bp=lp;
-  if (!(n=getinstr(lp)))
+  if (!(n=getinstr(lp))) {
     if (*lp=='#' && *(lp+1)=='#') {
       lp+=2;
       aint val;
@@ -49,6 +49,7 @@ void piZ80() {
     } else {
       error ("Unrecognized instruction",lp); return;
     }
+  }
   if (!z80funtab.zoek(n)) { error ("Unrecognized instruction",bp); *lp=0; }
 }
 
@@ -560,7 +561,8 @@ void pizDEC() {
     if (!oparen(lp,'[') && !oparen(lp,'(')) break;
     switch (reg=getz80reg(lp)) {
     case Z80_HL:
-      if (cparen(lp)) e[0]=0x35; break;
+      if (cparen(lp)) e[0]=0x35;
+      break;
     case Z80_IX: case Z80_IY:
       e[1]=0x35; e[2]=z80getidxoffset(lp);
       if (cparen(lp)) e[0]=reg;
@@ -713,7 +715,8 @@ void pizINC() {
     if (!oparen(lp,'[') && !oparen(lp,'(')) break;
     switch (reg=getz80reg(lp)) {
     case Z80_HL:
-      if (cparen(lp)) e[0]=0x34; break;
+      if (cparen(lp)) e[0]=0x34;
+      break;
     case Z80_IX: case Z80_IY:
       e[1]=0x34; e[2]=z80getidxoffset(lp);
       if (cparen(lp)) e[0]=reg;
@@ -1110,7 +1113,8 @@ void pizLD() {
       case Z80_HL: if (cparen(lp)) e[0]=0x4e; e[1]=0x23; e[2]=0x46; e[3]=0x2b; break;
       case Z80_IX: case Z80_IY:
         if ((b=z80getidxoffset(lp))==127) error("Offset out of range",0);
-        if (cparen(lp)) e[0]=e[3]=reg; e[1]=0x4e; e[4]=0x46; e[2]=b; e[5]=b+1; break;
+        if (cparen(lp)) e[0]=e[3]=reg;
+        e[1]=0x4e; e[4]=0x46; e[2]=b; e[5]=b+1; break;
       default: break;
       }
     }
@@ -1143,7 +1147,8 @@ void pizLD() {
       case Z80_HL: if (cparen(lp)) e[0]=0x5e; e[1]=0x23; e[2]=0x56; e[3]=0x2b; break;
       case Z80_IX: case Z80_IY:
         if ((b=z80getidxoffset(lp))==127) error("Offset out of range",0);
-        if (cparen(lp)) e[0]=e[3]=reg; e[1]=0x5e; e[4]=0x56; e[2]=b; e[5]=b+1; break;
+        if (cparen(lp)) e[0]=e[3]=reg;
+        e[1]=0x5e; e[4]=0x56; e[2]=b; e[5]=b+1; break;
       default: break;
       }
     }
@@ -1175,7 +1180,8 @@ void pizLD() {
       switch (reg) {
       case Z80_IX: case Z80_IY:
         if ((b=z80getidxoffset(lp))==127) error("Offset out of range",0);
-        if (cparen(lp)) e[0]=e[3]=reg; e[1]=0x6e; e[4]=0x66; e[2]=b; e[5]=b+1; break;
+        if (cparen(lp)) e[0]=e[3]=reg;
+        e[1]=0x6e; e[4]=0x66; e[2]=b; e[5]=b+1; break;
       default: break;
       }
     }
@@ -1205,7 +1211,7 @@ void pizLD() {
       if (oparen(lp,'[')) {
         b=z80getword(lp); e[1]=0x2a; e[2]=b&255; e[3]=(b>>8)&255; if (cparen(lp)) e[0]=0xdd; break;
       }
-      if (beginhaakje=oparen(lp,'(')) olp=--lp;
+      if ((beginhaakje=oparen(lp,'(')) != 0) olp=--lp;
       b=z80getword(lp);
       if (beginhaakje && getparen(olp)==lp) { e[0]=0xdd; e[1]=0x2a; e[2]=b&255; e[3]=(b>>8)&255; }
       else { e[0]=0xdd; e[1]=0x21; e[2]=b&255; e[3]=(b>>8)&255; }
@@ -1225,7 +1231,7 @@ void pizLD() {
       if (oparen(lp,'[')) {
         b=z80getword(lp); e[1]=0x2a; e[2]=b&255; e[3]=(b>>8)&255; if (cparen(lp)) e[0]=0xfd; break;
       }
-      if (beginhaakje=oparen(lp,'(')) olp=--lp;
+      if ((beginhaakje=oparen(lp,'(')) != 0) olp=--lp;
       b=z80getword(lp);
       if (beginhaakje && getparen(olp)==lp) { e[0]=0xfd; e[1]=0x2a; e[2]=b&255; e[3]=(b>>8)&255; }
       else { e[0]=0xfd; e[1]=0x21; e[2]=b&255; e[3]=(b>>8)&255; }
@@ -1367,7 +1373,8 @@ void pizLDD() {
       if (!cparen(lp) || !comma(lp)) break;
       switch(reg) {
       case Z80_BC: case Z80_DE:
-        if (getz80reg(lp)==Z80_A) e[0]=reg-14; e[1]=reg-5;
+        if (getz80reg(lp)==Z80_A) e[0]=reg-14;
+        e[1]=reg-5;
         break;
       case Z80_HL:
         switch (reg=getz80reg(lp)) {
@@ -1470,7 +1477,8 @@ void pizLDI() {
       if (!cparen(lp) || !comma(lp)) break;
       switch(reg) {
       case Z80_BC: case Z80_DE:
-        if (getz80reg(lp)==Z80_A) e[0]=reg-14; e[1]=reg-13;
+        if (getz80reg(lp)==Z80_A) e[0]=reg-14;
+        e[1]=reg-13;
         break;
       case Z80_HL:
         switch (reg=getz80reg(lp)) {
@@ -1624,7 +1632,8 @@ void pizOUT() {
           case Z80_H: e[0]=0xed; e[1]=0x61; break;
           case Z80_L: e[0]=0xed; e[1]=0x69; break;
           default:
-            if (!z80getbyte(lp)) e[0]=0xed; e[1]=0x71; break;
+            if (!z80getbyte(lp)) e[0]=0xed;
+            e[1]=0x71; break;
         }
     }
     else {
@@ -2209,6 +2218,7 @@ void pizSUB() {
       case Z80_DE: e[0]=0xb7; e[1]=0xed; e[2]=0x52; break;
       case Z80_HL: e[0]=0xb7; e[1]=0xed; e[2]=0x62; break;
       case Z80_SP: e[0]=0xb7; e[1]=0xed; e[2]=0x72; break;
+      default: break;
     }
     break;
   case Z80_A:

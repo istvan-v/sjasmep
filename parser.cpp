@@ -79,7 +79,7 @@ int ParseExpAdd(char *&p, aint &nval) {
   aint left,right;
   int oper;
   if (!ParseExpMul(p,left)) return 0;
-  while (oper=need(p,"+ - ")) {
+  while ((oper=need(p,"+ - ")) != 0) {
     if (!ParseExpMul(p,right)) return 0;
     switch (oper) {
     case '+': left+=right; break;
@@ -113,7 +113,7 @@ int ParseExpMinMax(char *&p, aint &nval) {
   aint left,right;
   int oper;
   if (!ParseExpShift(p,left)) return 0;
-  while (oper=need(p,"<?>?")) {
+  while ((oper=need(p,"<?>?")) != 0) {
     if (!ParseExpShift(p,right)) return 0;
     switch (oper) {
     case '<'+'?': left=left<right?left:right; break;
@@ -128,7 +128,7 @@ int ParseExpCmp(char *&p, aint &nval) {
   aint left,right;
   int oper;
   if (!ParseExpMinMax(p,left)) return 0;
-  while (oper=need(p,"<=>=< > ")) {
+  while ((oper=need(p,"<=>=< > ")) != 0) {
     if (!ParseExpMinMax(p,right)) return 0;
     switch (oper) {
     case '<': left=-(left<right); break;
@@ -145,7 +145,7 @@ int ParseExpEqu(char *&p, aint &nval) {
   aint left,right;
   int oper;
   if (!ParseExpCmp(p,left)) return 0;
-  while (oper=need(p,"=_==!=")) {
+  while ((oper=need(p,"=_==!=")) != 0) {
     if (!ParseExpCmp(p,right)) return 0;
     switch (oper) {
     case '=':
@@ -241,13 +241,14 @@ char *ReplaceDefine(char*lp) {
 
     if (*lp=='"' || *lp=='\'') {
       a=*lp; if (!comlin && !comnxtlin) { *rp=*lp; ++rp; } ++lp;
-      if (a!='\'' || (*(lp-2)!='f' || *(lp-3)!='a') && (*(lp-2)!='F' && *(lp-3)!='A'))
+      if (a!='\'' || ((*(lp-2)!='f' || *(lp-3)!='a') && (*(lp-2)!='F' && *(lp-3)!='A')))
         while ('o') {
           if (!*lp) { *rp=0; return nl; }
           if (!comlin && !comnxtlin) *rp=*lp;
           if (*lp==a) { if (!comlin && !comnxtlin) ++rp; ++lp; break; }
           if (*lp=='\\') { ++lp; if (!comlin && !comnxtlin) { ++rp; *rp=*lp; } }
-          if (!comlin && !comnxtlin) ++rp; ++lp;
+          if (!comlin && !comnxtlin) ++rp;
+          ++lp;
         }
       continue;
     }
@@ -257,7 +258,7 @@ char *ReplaceDefine(char*lp) {
     nid=getid(lp); dr=1;
     if (!(ver=definetab.getverv(nid))) if (!macrolabp || !(ver=macdeftab.getverv(nid))) { dr=0; ver=nid; }
     if (dr) definegereplaced=1;
-    while (*rp=*ver) { ++rp; ++ver; }
+    while ((*rp=*ver) != '\0') { ++rp; ++ver; }
   }
   if (strlen(nl)>LINEMAX-1) error("line too long after macro expansion",0,FATAL);
   if (definegereplaced) return ReplaceDefine(nl);
@@ -338,7 +339,7 @@ void ParseMacro() {
   char *p=lp,*n;
   skipblanks(p); if (*p=='@') { gl=1; ++p; }
   if (!(n=getid(p))) return;
-  if (structtab.emit(n,0,p,gl) || !gl && macrotab.emit(n,p)) *lp=0;
+  if (structtab.emit(n,0,p,gl) || (!gl && macrotab.emit(n,p))) *lp=0;
 }
 
 void ParseInstruction() {
@@ -362,7 +363,8 @@ void ParseLine() {
   ParseLabel(); if (skipblanks()) { ListFile(); return; }
   ParseMacro(); if (skipblanks()) { ListFile(); return; }
   ParseInstruction(); if (skipblanks()) { ListFile(); return; }
-  if (*lp) error("Unexpected",lp); ListFile();
+  if (*lp) error("Unexpected",lp);
+  ListFile();
 }
 
 void ParseStructLabel(structcls *st) {
@@ -392,17 +394,20 @@ void ParseInSTRUCTion(structcls *st) {
     st->addmemb(smp);
     break;
   case SMEMBBYTE:
-    if (!ParseExpression(lp,val)) val=0; check8(val);
+    if (!ParseExpression(lp,val)) val=0;
+    check8(val);
     smp=new structmembicls(st->noffset,1,val,SMEMBBYTE);
     st->addmemb(smp);
     break;
   case SMEMBWORD:
-    if (!ParseExpression(lp,val)) val=0; check16(val);
+    if (!ParseExpression(lp,val)) val=0;
+    check16(val);
     smp=new structmembicls(st->noffset,2,val,SMEMBWORD);
     st->addmemb(smp);
     break;
   case SMEMBD24:
-    if (!ParseExpression(lp,val)) val=0; check24(val);
+    if (!ParseExpression(lp,val)) val=0;
+    check24(val);
     smp=new structmembicls(st->noffset,3,val,SMEMBD24);
     st->addmemb(smp);
     break;

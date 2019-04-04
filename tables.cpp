@@ -56,8 +56,8 @@ char *MaakLabNaam(char *naam) {
     strcat(lp,macrolabp); strcat(lp,">");
   } else {
     if (!p && modlabp) {
-      int len1=strlen(lp);
-      int len2=strlen(modlabp);
+ //   int len1=strlen(lp);
+ //   int len2=strlen(modlabp);
       strcat(lp,modlabp);
       strcat(lp,".");
     }
@@ -72,7 +72,7 @@ char *MaakLabNaam(char *naam) {
 
 int getLabelValue(char *&p, aint &val) {
   char *mlp=macrolabp,*op=p;
-  int g=0,l=0,len,olabelnotfound=labelnotfound,plen;
+  int g=0,l=0,len,olabelnotfound=labelnotfound;
   char *np;
   if (mlp && *p=='@') { ++op; mlp=0; }
   if (mlp) {
@@ -84,13 +84,13 @@ int getLabelValue(char *&p, aint &val) {
     temp[0]=0;
     if (l) {
       strcat(temp,macrolabp); strcat(temp,">");
-      len=strlen(temp); np=temp+len; plen=0;
+      len=strlen(temp); np=temp+len;
       if (!isalpha(*p) && *p!='_') { error("Invalid labelname",temp); return 0; }
       while (isalnum(*p) || *p=='_' || *p=='.' || *p=='?' || *p=='!' || *p=='#' || *p=='@') {
         *np=*p; ++np; ++p;
       }
       *np=0;
-      if (strlen(temp)>LABMAX+len) {
+      if (strlen(temp)>size_t(LABMAX+len)) {
         error("2Label too long",temp+len);
         temp[LABMAX+len]=0;
       }
@@ -122,7 +122,7 @@ int getLabelValue(char *&p, aint &val) {
     *np=*p; ++np; ++p;
   }
   *np=0;
-  if (strlen(temp)>LABMAX+len) {
+  if (strlen(temp)>size_t(LABMAX+len)) {
     error("3Label too long",temp+len);
     temp[LABMAX+len]=0;
   }
@@ -153,9 +153,10 @@ int getLocaleLabelValue(char *&op,aint &val) {
   case 'f': case 'F': nval=loklabtab.zoekf(nummer); break;
   default: return 0;
   }
-  if (nval==(aint)-1)
+  if (nval==(aint)-1) {
     if (pass==2) { error("Label not found",naam,SUPPRES); return 1; }
     else nval=0;
+  }
   op=p; val=nval;
   return 1;
 }
@@ -172,7 +173,7 @@ int labtabcls::insert(char *nname,aint nvalue) {
   if (nextlocation>=LABTABSIZE*2/3) error("Label table full",0,FATAL);
   int tr,htr;
   tr=hash(nname);
-  while(htr=hashtable[tr]) {
+  while ((htr=hashtable[tr]) != 0) {
     if (!strcmp((labtab[htr].name),nname)) return 0;
     else if (++tr>=LABTABSIZE) tr=0;
   }
@@ -186,7 +187,7 @@ int labtabcls::insert(char *nname,aint nvalue) {
 int labtabcls::zoek(char *nname,aint &nvalue) {
   int tr,htr,otr;
   otr=tr=hash(nname);
-  while(htr=hashtable[tr]) {
+  while ((htr=hashtable[tr]) != 0) {
     if (!strcmp((labtab[htr].name),nname)) {
       nvalue=labtab[htr].value; if (pass==2) ++labtab[htr].used; return 1;
     }
@@ -203,7 +204,7 @@ int labtabcls::hash(char* s) {
   unsigned int h=0,g;
   for (;*ss!='\0';ss++) {
     h=(h<<4)+ *ss;
-    if (g=h & 0xf0000000) { h^=g>>24; h^=g; }
+    if ((g=(h & 0xf0000000)) != 0) { h^=g>>24; h^=g; }
   }
   return h % LABTABSIZE;
 }
@@ -245,7 +246,7 @@ int funtabcls::insert(char *nname, void(*nfunp)(void)) {
   if (nextlocation>=FUNTABSIZE*2/3) { cout << "funtab full" << endl; exit(1); }
   int tr,htr;
   tr=hash(nname);
-  while(htr=hashtable[tr]) {
+  while ((htr=hashtable[tr]) != 0) {
     if (!strcmp((funtab[htr].name),nname)) return 0;
     else if (++tr>=FUNTABSIZE) tr=0;
   }
@@ -254,11 +255,11 @@ int funtabcls::insert(char *nname, void(*nfunp)(void)) {
   funtab[nextlocation].funp=nfunp;
   ++nextlocation;
 
-  strcpy(p=temp,nname); while(*p=(char)toupper(*p)) ++p;
+  strcpy(p=temp,nname); while ((*p=(char)toupper(*p)) != '\0') ++p;
 
   if (nextlocation>=FUNTABSIZE*2/3) { cout << "funtab full" << endl; exit(1); }
   tr=hash(temp);
-  while(htr=hashtable[tr]) {
+  while ((htr=hashtable[tr]) != 0) {
     if (!strcmp((funtab[htr].name),temp)) return 0;
     else if (++tr>=FUNTABSIZE) tr=0;
   }
@@ -279,7 +280,7 @@ int funtabcls::insertd(char *nname, void(*nfunp)(void)) {
 int funtabcls::zoek(char *nname) {
   int tr,htr,otr;
   otr=tr=hash(nname);
-  while(htr=hashtable[tr]) {
+  while ((htr=hashtable[tr]) != 0) {
     if (!strcmp((funtab[htr].name),nname)) {
       (*funtab[htr].funp)(); return 1;
     }
@@ -509,17 +510,23 @@ structcls::structcls(char *nnaam,char *nid,int idx,int no,int ngl,structcls *p) 
 
 void structcls::addlabel(char *nnaam) {
   structmembncls *n=new structmembncls(nnaam,noffset);
-  if (!mnf) mnf=n; if (mnl) mnl->next=n; mnl=n;
+  if (!mnf) mnf=n;
+  if (mnl) mnl->next=n;
+  mnl=n;
 }
 
 void structcls::addmemb(structmembicls *n) {
-  if (!mbf) mbf=n; if (mbl) mbl->next=n; mbl=n;
+  if (!mbf) mbf=n;
+  if (mbl) mbl->next=n;
+  mbl=n;
   noffset+=n->len;
 }
 
 void structcls::copylabel(char *nnaam, aint offset) {
   structmembncls *n=new structmembncls(nnaam,noffset+offset);
-  if (!mnf) mnf=n; if (mnl) mnl->next=n; mnl=n;
+  if (!mnf) mnf=n;
+  if (mnl) mnl->next=n;
+  mnl=n;
 }
 
 void structcls::cpylabels(structcls *st) {
@@ -532,7 +539,9 @@ void structcls::cpylabels(structcls *st) {
 
 void structcls::copymemb(structmembicls *ni, aint ndef) {
   structmembicls *n=new structmembicls(noffset,ni->len,ndef,ni->soort);
-  if (!mbf) mbf=n; if (mbl) mbl->next=n; mbl=n;
+  if (!mbf) mbf=n;
+  if (mbl) mbl->next=n;
+  mbl=n;
   noffset+=n->len;
 }
 

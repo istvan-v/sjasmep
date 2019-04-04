@@ -106,8 +106,9 @@ char *getparen(char *p) {
   skipblanks(p);
   while (*p) {
     if (*p=='(') ++teller;
-    else if (*p==')')
+    else if (*p==')') {
       if (teller==1) { skipblanks(++p); return p; } else --teller;
+    }
     ++p;
   }
   return 0;
@@ -318,7 +319,7 @@ int getBytes(char *&p, int e[], int add, int dc) {
 }
 
 char *getfilename(char *&p) {
-  int o=0;
+//int o=0;
   char *fn,*np;
   np=fn=new char[LINEMAX];
   skipblanks(p);

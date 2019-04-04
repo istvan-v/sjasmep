@@ -34,7 +34,7 @@ int ParseDirective() {
   char *olp=lp;
   char *n;
   bp=lp;
-  if (!(n=getinstr(lp)))
+  if (!(n=getinstr(lp))) {
     if (*lp=='#' && *(lp+1)=='#') {
       lp+=2;
       aint val;
@@ -43,6 +43,7 @@ int ParseDirective() {
       return 1;
     }
     else { lp=olp;  return 0; }
+  }
   if (dirtab.zoek(n)) { return 1; }
   lp=olp;
   return 0;
@@ -316,7 +317,8 @@ void dirMODULE() {
   modlstp=new stringlst(modlabp,modlstp);
   char *n;
   skipblanks(lp); if (!*lp) { modlabp=0; return; }
-  if (n=getid(lp)) modlabp=n; else error("Syntax error",0,CATCHALL);
+  if ((n=getid(lp)) != (char *) 0) modlabp=n;
+  else error("Syntax error",0,CATCHALL);
 }
 
 void dirENDMODULE() {
