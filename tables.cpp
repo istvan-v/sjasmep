@@ -229,7 +229,8 @@ void labtabcls::dumpsym() {
   if (!(symfp=fopen(symfilename,"w"))) { cout << "Error opening file: " << symfilename << endl; exit(1); }
   for (int i=1; i<nextlocation; ++i) {
     if (!isdigit(labtab[i].name[0])) {
-      strcpy(eline,labtab[i].name); strcat(eline,": equ "); l=lnrs;
+      strcpy(eline,labtab[i].name);
+      strcat(eline,(!((unsigned int) labtab[i].value & 0x80000000U) ? ": equ " : ": equ 0")); l=lnrs;
       printhex32(l,labtab[i].value); *l=0; strcat(eline,lnrs); strcat(eline,"h\n");
       fputs(eline,symfp);
     }
