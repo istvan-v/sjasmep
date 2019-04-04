@@ -134,7 +134,7 @@ public:
   char *string;
   stringlst *next;
   stringlst() { next=0; }
-  stringlst(char*,stringlst*);
+  stringlst(const char*,stringlst*);
 };
 
 class macrotabentrycls {

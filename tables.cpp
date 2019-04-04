@@ -401,8 +401,8 @@ int macdefinetabcls::bestaat(char *naam) {
   return 0;
 }
 
-stringlst::stringlst(char*nstring,stringlst*nnext) {
-  string=strdup(nstring);
+stringlst::stringlst(const char *nstring,stringlst *nnext) {
+  string = (nstring != (char *) 0 ? strdup(nstring) : (char *) 0);
   next=nnext;
 }
 
