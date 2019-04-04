@@ -1341,7 +1341,7 @@ void pizLD() {
 
 void pizLDD() {
   Z80Reg reg, reg2;
-  int e[7],b;
+  int e[7],b=0;
   e[0]=e[1]=e[2]=e[3]=e[4]=e[5]=e[6]=-1;
   switch(reg=getz80reg(lp)) {
   case Z80_A:
@@ -1413,7 +1413,7 @@ void pizLDDR() {
 
 void pizLDI() {
   Z80Reg reg, reg2;
-  int e[11],b;
+  int e[11],b=0;
   e[0]=e[1]=e[2]=e[3]=e[4]=e[5]=e[6]=e[10]=-1;
   switch(reg=getz80reg(lp)) {
   case Z80_A:
