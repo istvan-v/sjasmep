@@ -1,4 +1,5 @@
 sjasm
 sjasm-linux
 sjasm.exe
+.deps
 *.o
