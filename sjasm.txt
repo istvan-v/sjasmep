@@ -122,6 +122,8 @@ Options:
 -Q  do not list the source and resulting objectcode in listfile
 -I  specify a directory to search for includefiles
 -S  output a .SYM symbolfile which contains all labels.
+-Dname=value  define an identifier (same as ' DEFINE name value' in the source)
+-Ename=value  define a label like 'name EQU value', hexadecimal with 0x prefix
 
 Options may be grouped, and it's permitted to place them anywhere. Examples:
 

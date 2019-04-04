@@ -32,7 +32,7 @@ char destfilename[LINEMAX],listfilename[LINEMAX],expfilename[LINEMAX],sourcefile
 
 char filename[LINEMAX],*lp,line[LINEMAX],temp[LINEMAX],*tp,pline[LINEMAX*2],eline[LINEMAX*2],*bp;
 
-int pass,labelnotfound,nerror,include=-1,running,labellisting=0,listfile=1,donotlist,listdata,listmacro;
+int pass,labelnotfound,nerror=0,include=-1,running,labellisting=0,listfile=1,donotlist,listdata,listmacro;
 int macronummer,lijst,reglenwidth,synerr=1,symfile=0;
 aint adres,mapadr,gcurlin,lcurlin,curlin,destlen,size=(aint)-1,preverror=(aint)-1,maxlin=0,comlin;
 #ifdef METARM
@@ -82,7 +82,7 @@ void InitPass(int p) {
 #endif
   structtab.init();
   macrotab.init();
-  definetab.init();
+//definetab.init();
   macdeftab.init();
 }
 
@@ -91,12 +91,35 @@ void getOptions(char **&argv,int &i) {
   while (argv[i] && *argv[i]=='-') {
     p=argv[i++]+1;
     do {
-      c=*p++;
-      switch (tolower(c)) {
+      c=*p++; c=tolower(c);
+      switch (c) {
       case 'q': listfile=0; break;
       case 's': symfile=1; break;
       case 'l': labellisting=1; break;
       case 'i': dirlstp=new stringlst(p,dirlstp); p=""; break;
+      case 'd':
+      case 'e':
+        {
+          char    *name = p;
+          char    *value = (char *) strchr(p, '=');
+          char    *endp = (char *) 0;
+          if (!value) {
+            value = "1"; p = (char *) 0;
+          }
+          else {
+            name = (char *) malloc(value + 1 - p);
+            memcpy(name, p, value - p); name[value - p] = '\0';
+            value++; p = name;
+          }
+          if (c == 'd')
+            definetab.add(name, value);
+          else if (!labtab.insert(name, strtol(value, &endp, 0)))
+            { cerr << "Duplicate label: " << name << endl; exit(1); }
+          if (p)
+            free(p);
+          p = "";
+        }
+        break;
       default:
         cout << "Unrecognised option: " << c << endl;
         break;
@@ -120,12 +143,15 @@ int main(int argc, char *argv[]) {
     cout << "  -s        Generate .SYM symbol file\n";
     cout << "  -q        No listing\n";
     cout << "  -i<path>  Includepath\n";
+    cout << "  -Dname=value  Define identifier\n";
+    cout << "  -Ename=value  Define label\n";
     exit(1);
   }
 
   GetCurrentDirectory(MAX_PATH,zoekpad);
   huidigzoekpad=zoekpad;
 
+  definetab.init();
   getOptions(argv,i); if (argv[i]) strcpy(sourcefilename,argv[i++]);
   getOptions(argv,i); if (argv[i]) strcpy(destfilename,argv[i++]);
   getOptions(argv,i); if (argv[i]) strcpy(listfilename,argv[i++]);
