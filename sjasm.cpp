@@ -39,6 +39,7 @@ aint adres,mapadr,gcurlin,lcurlin,curlin,destlen,size=(aint)-1,preverror=(aint)-
 cpus cpu;
 #endif
 char *huidigzoekpad;
+int endadres=0;
 
 void (*piCPUp)(void);
 
@@ -183,7 +184,7 @@ int main(int argc, char *argv[]) {
 
   Initpi();
 
-  InitPass(1); OpenList(); OpenFile(sourcefilename);
+  InitPass(1); OpenList(); OpenFile(sourcefilename); endadres=adres;
 
   cout << "Pass 1 complete (" << nerror << " errors)" << endl;
 
