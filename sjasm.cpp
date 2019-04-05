@@ -195,7 +195,8 @@ int main(int argc, char *argv[]) {
 
   Close();
 
-  if (symfile) labtab.dumpsym();
+  if (nerror) remove(destfilename);
+  else if (symfile) labtab.dumpsym();
 
   cout << "Errors: " << nerror << endl << flush;
 
