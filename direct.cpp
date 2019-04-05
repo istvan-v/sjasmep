@@ -185,6 +185,104 @@ void dirBYTEL() {
 #endif
 }
 
+void dirBYTER() {
+  int teller,e[129];
+  teller=getBytes(lp,e,0,0);
+  if (!teller) { error(".dbr with no arguments",0); return; }
+  for (int i=0; i<teller; i++) e[i] &= 0x7f;
+#ifdef SECTIONS
+  switch (section) {
+  case TEXT: case POOL: EmitBytes(e); break;
+  case DATA: pooltab.add(bp); break;
+  default: error ("Unknown section",0,FATAL); break;
+  }
+#else
+  EmitBytes(e);
+#endif
+}
+
+void dirBYTES() {
+  int teller,e[129];
+  teller=getBytes(lp,e,0,0);
+  if (!teller) { error(".dbs with no arguments",0); return; }
+  for (int i=0; i<teller; i++) e[i] |= 0x80;
+#ifdef SECTIONS
+  switch (section) {
+  case TEXT: case POOL: EmitBytes(e); break;
+  case DATA: pooltab.add(bp); break;
+  default: error ("Unknown section",0,FATAL); break;
+  }
+#else
+  EmitBytes(e);
+#endif
+}
+
+void dirPIXEL2() {
+  int teller,e[129];
+  teller=getBytes(lp,e,0,0);
+  if (!teller) { error(".dp2 with no arguments",0); return; }
+  while (teller&7) e[teller++]=0;
+  for (int i=0; i<teller; i++) e[i>>3] = ((e[i>>3]&0x7f)<<1) | (e[i]&0x01);
+  teller=teller>>3; e[teller]=-1;
+#ifdef SECTIONS
+  switch (section) {
+  case TEXT: case POOL: EmitBytes(e); break;
+  case DATA: pooltab.add(bp); break;
+  default: error ("Unknown section",0,FATAL); break;
+  }
+#else
+  EmitBytes(e);
+#endif
+}
+
+void dirPIXEL4() {
+  int teller,e[129];
+  teller=getBytes(lp,e,0,0);
+  if (!teller) { error(".dp4 with no arguments",0); return; }
+  while (teller&3) e[teller++]=0;
+  for (int i=0; i<teller; i++) e[i>>2] = ((e[i>>2]&0x3f)<<2) | (e[i]&0x03);
+  teller=teller>>2; e[teller]=-1;
+  for (int i=0; i<teller; i++) {
+    e[i] =   ((e[i]&0x80)>>4) | ((e[i]&0x40)<<1)
+           | ((e[i]&0x20)>>3) | ((e[i]&0x10)<<2)
+           | ((e[i]&0x08)>>2) | ((e[i]&0x04)<<3)
+           | ((e[i]&0x02)>>1) | ((e[i]&0x01)<<4);
+  }
+#ifdef SECTIONS
+  switch (section) {
+  case TEXT: case POOL: EmitBytes(e); break;
+  case DATA: pooltab.add(bp); break;
+  default: error ("Unknown section",0,FATAL); break;
+  }
+#else
+  EmitBytes(e);
+#endif
+}
+
+void dirPIXEL16() {
+  int teller,e[129];
+  teller=getBytes(lp,e,0,0);
+  if (!teller) { error(".dp16 with no arguments",0); return; }
+  if (teller&1) e[teller++]=0;
+  for (int i=0; i<teller; i++) e[i>>1] = ((e[i>>1]&0x0f)<<4) | (e[i]&0x0f);
+  teller=teller>>1; e[teller]=-1;
+  for (int i=0; i<teller; i++) {
+    e[i] =   ((e[i]&0x80)>>6) | ((e[i]&0x40)>>1)
+           | ((e[i]&0x20)>>2) | ((e[i]&0x10)<<3)
+           | ((e[i]&0x08)>>3) | ((e[i]&0x04)<<2)
+           | ((e[i]&0x02)<<1) | ((e[i]&0x01)<<6);
+  }
+#ifdef SECTIONS
+  switch (section) {
+  case TEXT: case POOL: EmitBytes(e); break;
+  case DATA: pooltab.add(bp); break;
+  default: error ("Unknown section",0,FATAL); break;
+  }
+#else
+  EmitBytes(e);
+#endif
+}
+
 void dirWORD() {
   aint val;
   int teller=0,e[129];
@@ -734,6 +832,11 @@ void InsertDirectives() {
   dirtab.insertd("dd",dirDWORD);
   dirtab.insertd("dm",dirBYTE);
   dirtab.insertd("dbl",dirBYTEL);
+  dirtab.insertd("dbr",dirBYTER);
+  dirtab.insertd("dbs",dirBYTES);
+  dirtab.insertd("dp2",dirPIXEL2);
+  dirtab.insertd("dp4",dirPIXEL4);
+  dirtab.insertd("dp16",dirPIXEL16);
   dirtab.insertd("defb",dirBYTE);
   dirtab.insertd("defw",dirWORD);
   dirtab.insertd("defs",dirBLOCK);

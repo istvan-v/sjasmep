@@ -409,6 +409,18 @@ DBL
 ---
 Same as BYTE, but the length of the string is stored before the first byte.
 
+DBR, DBS
+--------
+Same as BYTE, but with bit 7 of every character reset or set.
+
+DP2, DP4, DP16
+--------------
+Define pixels in Enterprise and Amstrad CPC 2, 4, or 16 color format.
+
+  DP2  0,1,1,0,1,0,0,1  ; same as BYTE 69H
+  DP4  0,1,2,3          ; same as BYTE 53H
+  DP16 5,10             ; same as BYTE 0A5H
+
 DD
 --
 See DWORD.
