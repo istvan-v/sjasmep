@@ -170,6 +170,21 @@ void dirABYTEZ() {
   } else error("Expression expected",0);
 }
 
+void dirBYTEL() {
+  int teller,e[130];
+  teller=getBytes(lp,e+1,0,0);
+  e[0]=teller;
+#ifdef SECTIONS
+  switch (section) {
+  case TEXT: case POOL: EmitBytes(e); break;
+  case DATA: pooltab.add(bp); break;
+  default: error ("Unknown section",0,FATAL); break;
+  }
+#else
+  EmitBytes(e);
+#endif
+}
+
 void dirWORD() {
   aint val;
   int teller=0,e[129];
@@ -698,6 +713,7 @@ void InsertDirectives() {
   dirtab.insertd("ds",dirBLOCK);
   dirtab.insertd("dd",dirDWORD);
   dirtab.insertd("dm",dirBYTE);
+  dirtab.insertd("dbl",dirBYTEL);
   dirtab.insertd("defb",dirBYTE);
   dirtab.insertd("defw",dirWORD);
   dirtab.insertd("defs",dirBLOCK);

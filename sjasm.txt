@@ -405,6 +405,10 @@ Same as BYTE, but every last character of a string will have bit 7 set.
 
   DC "kip" ; same as BYTE "ki",'p'|128
 
+DBL
+---
+Same as BYTE, but the length of the string is stored before the first byte.
+
 DD
 --
 See DWORD.
