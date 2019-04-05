@@ -578,6 +578,11 @@ Set the program counter to a specific address.
 
   ORG 100h
 
+HEADER <type>,<endaddress>
+------
+
+Defines EXOS module header (16 bytes), type must be 5 or 6, the program counter is set to 0100H or 0C00AH. The end address is a label after the last byte of the program or extension.
+
 OUTPUT "<filename>",mode
 ------
 With OUTPUT it is possible to create multiple files from one source. All following instructions will be assembled to this file.

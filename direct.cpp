@@ -290,6 +290,25 @@ void dirORG() {
   if (ParseExpression(lp,val)) adres=val; else error("Syntax error",0,CATCHALL);
 }
 
+void dirHEADER() {
+  int e[9];
+  aint val;
+#ifdef SECTIONS
+  if (section!=TEXT) { error("HEADER only allowed in text sections",0); *lp=0; return; }
+#endif
+  if (!ParseExpression(lp,val)) error("Syntax error",0,CATCHALL);
+  if (val<5 || val>6) error("Invalid or unsupported HEADER type",0);
+  adres = (val!=6 ? 0x00f0 : 0xbffa);
+  e[0] = int(val<<8);
+  if (!comma(lp)) error("Syntax error",0,CATCHALL);
+  else ParseExpression(lp,val);
+  e[1] = int(val-(adres+16)); check16(e[1]);
+  if (e[1]>(adres<0x8000 ? 0xbf00 : 0x3ff6)) error("Bytes lost",0);
+  for (int i=2; i<8; i++) e[i] = 0;
+  e[8] = -1;
+  EmitWords(e);
+}
+
 void dirMAP() {
 #ifdef SECTIONS
   if (section!=TEXT) { error(".map only allowed in text sections",0); *lp=0; return; }
@@ -684,6 +703,7 @@ void InsertDirectives() {
   dirtab.insertd("dword",dirDWORD);
   dirtab.insertd("d24",dirD24);
   dirtab.insertd("org",dirORG);
+  dirtab.insertd("header",dirHEADER);
   dirtab.insertd("map",dirMAP);
   dirtab.insertd("align",dirALIGN);
   dirtab.insertd("module",dirMODULE);
