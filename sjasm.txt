@@ -902,6 +902,8 @@ If this is absolutely necessary (why?) use something like this:
 Of course the Z80 is only an 8 bit cpu, but sometimes ld hl,de would be nice. SjASM now 'fakes' some instructions like that. This improves the readability of the source, but it might not be the fastest way to get the result. Also possibly some 'new' load instructions do affect the flags in ways you wouldn't expect.
 Anyway, here's the list:
 
+  exos n
+
   rl bc
   rl de
   rl hl

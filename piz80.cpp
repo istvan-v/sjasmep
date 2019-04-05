@@ -630,6 +630,12 @@ void pizEX() {
   EmitBytes(e);
 }
 
+void pizEXOS() {
+  int e[3];
+  e[0]=0xf7; e[1]=z80getbyte(lp); e[2]=-1;
+  EmitBytes(e);
+}
+
 void pizEXX() {
   EmitByte(0xd9);
 }
@@ -2319,6 +2325,7 @@ void InitpiZ80() {
   z80funtab.insert("djnz",pizDJNZ);
   z80funtab.insert("ei",pizEI);
   z80funtab.insert("ex",pizEX);
+  z80funtab.insert("exos",pizEXOS);
   z80funtab.insert("exx",pizEXX);
   z80funtab.insert("halt",pizHALT);
   z80funtab.insert("im",pizIM);
