@@ -232,7 +232,7 @@ void relocfile() {
     }
     if (fsize<2 || fsize>(0xe380<<1) || endadres<1 || endadres>0xe380)
       error("Invalid relocatable module size",0,FATAL);
-    if (!(buf = (unsigned char *) malloc((fsize*4+64)*sizeof(unsigned char))))
+    if (!(buf = (unsigned char *) malloc((fsize*3+64)*sizeof(unsigned char))))
       error("Error allocating memory",0,FATAL);
     if (fread(buf,sizeof(unsigned char),fsize,output) != fsize)
       { free(buf); error("Error reading output file",0,FATAL); }
@@ -268,19 +268,21 @@ void relocfile() {
         i++;
       }
       else if (exoshdrtype==4) {
-        if ((i%6)==0) {
-          buf2[fsize2++]=0x12+(((endadres-i)<6 ? (endadres-i):6)*3);
-          buf2[fsize2++]=(i/6+101)&0xff; buf2[fsize2++]=((i/6+101)>>8)&0xff;
-          buf2[fsize2++]=0x00; buf2[fsize2++]=0x60; buf2[fsize2++]=0x09;
-          buf2[fsize2++]=0x21; buf2[fsize2++]=(!i ? 0x43:0x44);
-          buf2[fsize2++]=0x13; buf2[fsize2++]=0x44; buf2[fsize2++]=0x48;
-          buf2[fsize2++]=0x45; buf2[fsize2++]=0x58; buf2[fsize2++]=0x24;
-          buf2[fsize2++]=0x08; buf2[fsize2++]=0x80;
-          buf2[fsize2]=buf2[fsize2-16]-19; fsize2++;
+        if ((i&15)==0) {
+          buf2[fsize2+1]=((i>>4)+101)&0xff;
+          buf2[fsize2+2]=(((i>>4)+101)>>8)&0xff;
+          buf2[fsize2+3]=0;
+          unsigned char *p=buf2+(fsize2+4);
+          if (!i) { strcpy((char *) p,"\140\011!C\023DHEX$\010\200"); p=p+12; }
+          else { strcpy((char *) p,"\140\011\023DHEX$\010\200"); p=p+10; }
+          unsigned char l=((endadres-i)<16 ? (endadres-i):16)*3-1;
+          buf2[fsize2] = (unsigned char) (p-(buf2+fsize2)) + (l+3);
+          *p=l;
+          fsize2=p+1-buf2;
         }
         else buf2[fsize2++]=0x2c;
         char *p = (char *) (buf2+fsize2); printhex8(p,buf[i]); fsize2=fsize2+2;
-        if ((i%6)==5 || (i+1)>=endadres)
+        if ((i&15)==15 || (i+1)>=endadres)
           { buf2[fsize2++]=0x09; buf2[fsize2++]=0x00; }
       }
       else
