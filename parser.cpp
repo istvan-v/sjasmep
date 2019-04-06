@@ -278,7 +278,7 @@ void ParseLabel() {
   switch (section) {
   case TEXT:
 #endif
-	if (isdigit(*tp)) {
+  if (isdigit(*tp)) {
     if (needequ() || needfield()) {
       error("Numberlabels only allowed as adresslabels",0);
 #ifdef SECTIONS
@@ -288,14 +288,15 @@ void ParseLabel() {
 #endif
     }
     val=atoi(tp); if (pass==1) loklabtab.insert(val,adres);
-	} else {
-	  if (needequ()) {
-  		if (!ParseExpression(lp,val)) { error("Expression error",lp); val=0; }
-  		if (labelnotfound) { error("Forward reference",0,PASS1); }
-	  } else if (needfield()) {
-		  aint nv;
-		  val=mapadr;
-      synerr=0; if (ParseExpression(lp,nv)) mapadr+=nv; synerr=1;
+  } else {
+    if (needequ()) {
+      if (!ParseExpression(lp,val)) { error("Expression error",lp); val=0; }
+      if (labelnotfound) { error("Forward reference",0,PASS1); }
+    } else if (needfield()) {
+      aint nv;
+      val=mapadr;
+      synerr=0; if (ParseExpression(lp,nv)) mapadr+=nv;
+      synerr=1;
       if (labelnotfound) error("Forward reference",0,PASS1);
     } else {
       int gl=0;
@@ -306,7 +307,7 @@ void ParseLabel() {
       val=adres;
     }
     ttp=tp;
-	  if (!(tp=MaakLabNaam(tp)))
+    if (!(tp=MaakLabNaam(tp)))
 #ifdef SECTIONS
       break;
 #else
@@ -317,7 +318,7 @@ void ParseLabel() {
       if (val!=oval) error("Label has different value in pass 2",temp);
     } else
       if (!labtab.insert(tp,val)) error("Duplicate label",tp,PASS1);
-	}
+  }
 #ifdef SECTIONS
   break;
   case DATA:
@@ -375,7 +376,7 @@ void ParseStructLabel(structcls *st) {
   while (*lp && islabchar(*lp)) { *tp=*lp; ++tp; ++lp; }
   *tp=0; if (*lp==':') ++lp;
   tp=temp; skipblanks();
-	if (isdigit(*tp)) { error("Numberlabels not allowed within structs",0); return; }
+  if (isdigit(*tp)) { error("Numberlabels not allowed within structs",0); return; }
   prevlab=strdup(tp); st->addlabel(tp);
 }
 
