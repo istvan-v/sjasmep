@@ -169,7 +169,7 @@ labtabcls::labtabcls() {
   nextlocation=1;
 }
 
-int labtabcls::insert(char *nname,aint nvalue) {
+int labtabcls::insert(const char *nname,aint nvalue) {
   if (nextlocation>=LABTABSIZE*2/3) error("Label table full",0,FATAL);
   int tr,htr;
   tr=hash(nname);
@@ -184,7 +184,7 @@ int labtabcls::insert(char *nname,aint nvalue) {
   return 1;
 }
 
-int labtabcls::zoek(char *nname,aint &nvalue) {
+int labtabcls::zoek(const char *nname,aint &nvalue) {
   int tr,htr,otr;
   otr=tr=hash(nname);
   while ((htr=hashtable[tr]) != 0) {
@@ -199,8 +199,8 @@ int labtabcls::zoek(char *nname,aint &nvalue) {
   return 0;
 }
 
-int labtabcls::hash(char* s) {
-  char *ss=s;
+int labtabcls::hash(const char* s) {
+  const char *ss=s;
   unsigned int h=0,g;
   for (;*ss!='\0';ss++) {
     h=(h<<4)+ *ss;
@@ -235,7 +235,16 @@ void labtabcls::dumpsym() {
       fputs(eline,symfp);
     }
   }
-    fclose(symfp);
+  fclose(symfp);
+}
+
+void labtabcls::clear() {
+  for (int i=0; i<LABTABSIZE; i++) hashtable[i]=0;
+  while (nextlocation>1) {
+    nextlocation--;
+    free(labtab[nextlocation].name); labtab[nextlocation].name=NULL;
+    labtab[nextlocation].value=labtab[nextlocation].used=0;
+  }
 }
 
 funtabcls::funtabcls() {

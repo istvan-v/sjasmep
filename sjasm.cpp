@@ -210,8 +210,6 @@ int main(int argc, char *argv[]) {
   return (nerror!=0);
 }
 
-extern void dirMODULE();
-extern void dirENDMODULE();
 extern void printhex8(char *&p, aint h);
 extern FILE *output;
 
@@ -222,11 +220,9 @@ void relocfile() {
   unsigned char *buf=0;
   size_t fsize;
   do {
-    relocpass=true; Close(); listfile=0; listdata=0; listmacro=0;
-    InitPass(1); adres=reloc_offs;
-    lp="__reloc_mod__"; dirMODULE(); OpenFile(sourcefilename); dirENDMODULE();
-    InitPass(2); adres=reloc_offs;
-    lp="__reloc_mod__"; dirMODULE(); OpenFile(sourcefilename); dirENDMODULE();
+    relocpass=true; Close(); labtab.clear(); listfile=listdata=listmacro=0;
+    InitPass(1); adres=reloc_offs; OpenFile(sourcefilename);
+    InitPass(2); adres=reloc_offs; OpenFile(sourcefilename);
     Close(); relocpass=false;
     if (!(output=freopen(destfilename,"rb",output)))
       error("Error reopening output file",0,FATAL);

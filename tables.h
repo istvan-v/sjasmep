@@ -44,14 +44,15 @@ public:
 class labtabcls {
 public:
   labtabcls();
-  int insert(char*,aint);
-  int zoek(char*,aint&);
+  int insert(const char*,aint);
+  int zoek(const char*,aint&);
   void dump();
   void dumpsym();
+  void clear();
 private:
   int hashtable[LABTABSIZE],nextlocation;
   labtabentrycls labtab[LABTABSIZE];
-  int hash(char*);
+  int hash(const char*);
 };
 
 class funtabentrycls {
