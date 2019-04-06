@@ -228,7 +228,7 @@ void relocfile() {
     InitPass(2); adres=reloc_offs;
     lp="__reloc_mod__"; dirMODULE(); OpenFile(sourcefilename); dirENDMODULE();
     Close(); relocpass=false;
-    if (!(output=freopen((char *) 0, "rb", output)))
+    if (!(output=freopen(destfilename,"rb",output)))
       error("Error reopening output file",0,FATAL);
     if (fseek(output,0,SEEK_END)<0 || long(fsize=size_t(ftell(output)))<0 ||
         fseek(output,0,SEEK_SET)<0) {
@@ -240,7 +240,7 @@ void relocfile() {
       error("Error allocating memory",0,FATAL);
     if (fread(buf,sizeof(unsigned char),fsize,output) != fsize)
       { free(buf); error("Error reading output file",0,FATAL); }
-    if (!(output=freopen((char *) 0, "wb", output)))
+    if (!(output=freopen(destfilename,"wb",output)))
       { free(buf); error("Error reopening output file",0,FATAL); }
     unsigned char *buf2=buf+fsize;
     size_t fsize2=16;
