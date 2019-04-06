@@ -75,6 +75,8 @@ extern cpus cpu;
 enum structmembs { SMEMBUNKNOWN,SMEMBALIGN,SMEMBBYTE,SMEMBWORD,SMEMBBLOCK, SMEMBDWORD, SMEMBD24, SMEMBPARENOPEN, SMEMBPARENCLOSE };
 extern char *huidigzoekpad;
 extern int endadres;
+extern unsigned char exoshdrtype;
+extern bool relocpass;
 
 #include "reader.h"
 #include "tables.h"

@@ -40,6 +40,8 @@ cpus cpu;
 #endif
 char *huidigzoekpad;
 int endadres=0;
+unsigned char exoshdrtype=0;
+bool relocpass=false;
 
 void (*piCPUp)(void);
 
@@ -129,6 +131,8 @@ void getOptions(char **&argv,int &i) {
   }
 }
 
+void relocfile();
+
 int main(int argc, char *argv[]) {
   char zoekpad[MAX_PATH];
   char *p;
@@ -194,6 +198,8 @@ int main(int argc, char *argv[]) {
 
   cout << "Pass 2 complete" << endl;
 
+  if (exoshdrtype && (exoshdrtype<5 || exoshdrtype>6) && !nerror) relocfile();
+
   Close();
 
   if (nerror) remove(destfilename);
@@ -202,5 +208,112 @@ int main(int argc, char *argv[]) {
   cout << "Errors: " << nerror << endl << flush;
 
   return (nerror!=0);
+}
+
+extern void dirMODULE();
+extern void dirENDMODULE();
+extern void printhex8(char *&p, aint h);
+extern FILE *output;
+
+void relocfile() {
+  const int reloc_offs=6037;
+  int err_offs=0;
+  const char *errmsg=0;
+  unsigned char *buf=0;
+  size_t fsize;
+  do {
+    relocpass=true; Close(); listfile=0; listdata=0; listmacro=0;
+    InitPass(1); adres=reloc_offs;
+    lp="__reloc_mod__"; dirMODULE(); OpenFile(sourcefilename); dirENDMODULE();
+    InitPass(2); adres=reloc_offs;
+    lp="__reloc_mod__"; dirMODULE(); OpenFile(sourcefilename); dirENDMODULE();
+    Close(); relocpass=false;
+    if (!(output=freopen((char *) 0, "rb", output)))
+      error("Error reopening output file",0,FATAL);
+    if (fseek(output,0,SEEK_END)<0 || long(fsize=size_t(ftell(output)))<0 ||
+        fseek(output,0,SEEK_SET)<0) {
+      error("Error seeking output file",0,FATAL); return;
+    }
+    if (fsize<2 || fsize>(0xe380<<1) || endadres<1 || endadres>0xe380)
+      error("Invalid relocatable module size",0,FATAL);
+    if (!(buf = (unsigned char *) malloc((fsize*4+64)*sizeof(unsigned char))))
+      error("Error allocating memory",0,FATAL);
+    if (fread(buf,sizeof(unsigned char),fsize,output) != fsize)
+      { free(buf); error("Error reading output file",0,FATAL); }
+    if (!(output=freopen((char *) 0, "wb", output)))
+      { free(buf); error("Error reopening output file",0,FATAL); }
+    unsigned char *buf2=buf+fsize;
+    size_t fsize2=16;
+    for (int i=0; i<26; i++) buf2[i]=0;
+    buf2[1]=exoshdrtype;
+    if (exoshdrtype==2) {
+      buf2[4]=0xff;
+      buf2[5]=0xff;
+    }
+    else if (exoshdrtype==4) {
+      buf2[16]=0x0a; buf2[17]=100; buf2[20]=0x60; buf2[22]=0xc2;
+      buf2[23]=endadres&0xff; buf2[24]=(endadres>>8)&0xff;
+      fsize2=26;
+    }
+    unsigned int sr=0,srbits=0;
+    for (int i=0; i<endadres; i++) {
+      err_offs=i;
+      if (size_t(endadres+i) >= fsize)
+        { errmsg="Unexpected end of output"; break; }
+      if (buf[i]!=buf[endadres+i]) {
+        if (size_t(endadres+i+1) >= fsize)
+          { errmsg="Unexpected end of output"; break; }
+        int a1 = int(buf[i]) | (int(buf[i+1])<<8);
+        int a2 = int(buf[long(endadres)+i]) | (int(buf[long(endadres)+i+1])<<8);
+        if ((a2-a1)!=reloc_offs || exoshdrtype==4)
+          { errmsg="Invalid relocatable code"; break; }
+        sr = (sr<<11)|0x400|((a1-i)&0xff); sr = (sr<<8)|(((a1-i)>>8)&0xff);
+        srbits = srbits+19;
+        i++;
+      }
+      else if (exoshdrtype==4) {
+        if ((i%6)==0) {
+          buf2[fsize2++]=0x12+(((endadres-i)<6 ? (endadres-i):6)*3);
+          buf2[fsize2++]=(i/6+101)&0xff; buf2[fsize2++]=((i/6+101)>>8)&0xff;
+          buf2[fsize2++]=0x00; buf2[fsize2++]=0x60; buf2[fsize2++]=0x09;
+          buf2[fsize2++]=0x21; buf2[fsize2++]=(!i ? 0x43:0x44);
+          buf2[fsize2++]=0x13; buf2[fsize2++]=0x44; buf2[fsize2++]=0x48;
+          buf2[fsize2++]=0x45; buf2[fsize2++]=0x58; buf2[fsize2++]=0x24;
+          buf2[fsize2++]=0x08; buf2[fsize2++]=0x80;
+          buf2[fsize2]=buf2[fsize2-16]-19; fsize2++;
+        }
+        else buf2[fsize2++]=0x2c;
+        char *p = (char *) (buf2+fsize2); printhex8(p,buf[i]); fsize2=fsize2+2;
+        if ((i%6)==5 || (i+1)>=endadres)
+          { buf2[fsize2++]=0x09; buf2[fsize2++]=0x00; }
+      }
+      else
+        { sr = (sr<<9)|buf[i]; srbits = srbits+9; }
+      if ((i+1)>=endadres) {
+        if (exoshdrtype==4) buf2[fsize2++]=0;
+        else { sr = (sr<<3)|6; srbits = srbits+3; }
+      }
+      while (srbits>=8)
+        { buf2[fsize2++] = (sr>>(srbits-8))&0xff; srbits = srbits-8; }
+    }
+    if (errmsg) break;
+    if (srbits) buf2[fsize2++] = (sr<<(8-srbits))&0xff;
+    buf2[2]=(fsize2-16)&0xff;
+    buf2[3]=((fsize2-16)>>8)&0xff;
+    if (exoshdrtype==4) {
+      for (int i=0; i<16; i++) buf2[fsize2++]=0;
+      buf2[fsize2-15]=0x0a;
+    }
+    if (fwrite(buf2,sizeof(unsigned char),fsize2,output) != fsize2 ||
+        fflush(output)!=0) {
+      free(buf); error("Write error (disk full?)",0,FATAL); return;
+    }
+  } while (false);
+  if (buf) free(buf);
+  if (errmsg) {
+    char tmpbuf[128];
+    sprintf(tmpbuf,"%s at output offset 0x%08X",errmsg,(unsigned int) err_offs);
+    error(tmpbuf,0,FATAL);
+  }
 }
 //eof sjasm.cpp

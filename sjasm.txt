@@ -593,7 +593,7 @@ Set the program counter to a specific address.
 HEADER <type>[,endaddress]
 ------
 
-Defines EXOS module header (16 bytes), type must be 5 or 6, the program counter is set to 0100H or 0C00AH. The end address is a label after the last byte of the program or extension.
+Defines EXOS module header (16 bytes), type must be 2, 4, 5, 6, or 7. If the module type is 5 or 6, the program counter is set to 0100H or 0C00AH, respectively. For types 5 and 6, the optional end address is a label after the last byte of the program or extension.
 
 OUTPUT "<filename>",mode
 ------

@@ -41,7 +41,7 @@ FILE *listfp,*expfp=NULL;
 aint eadres,epadres,desttel=0,skiperrors=0;;
 char hd[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
-void error(char *fout,char *bd,int soort) {
+void error(const char *fout,const char *bd,int soort) {
   char *ep=eline;
   if (skiperrors && preverror==lcurlin && soort!=FATAL) return;
   if (soort==CATCHALL && preverror==lcurlin) return;
@@ -55,7 +55,10 @@ void error(char *fout,char *bd,int soort) {
   if (!strchr(ep,'\n')) strcat(ep,"\n");
   if (listfile) fputs(eline,listfp);
   cout << eline;
-  if (soort==FATAL) exit(1);
+  if (soort==FATAL) {
+    if (output) { fclose(output); remove(destfilename); }
+    exit(1);
+  }
 }
 
 void WriteDest() {
@@ -364,12 +367,12 @@ void CloseDest() {
     if (desttel) WriteDest();
     }
   }
-  fclose(output);
+  if (!relocpass) fclose(output);
 }
 
 void SeekDest(long offset,int method) {
-	WriteDest();
-	if(fseek(output,offset,method)) error("File seek error (FORG)",0,FATAL);
+  WriteDest();
+  if(fseek(output,offset,method)) error("File seek error (FORG)",0,FATAL);
 }
 
 void NewDest(char *ndestfilename) {
@@ -412,10 +415,13 @@ int FileExists(char* filename) {
 void Close() {
   CloseDest();
   if (expfp) {
-	fclose(expfp);
-	expfp = NULL;
+    fclose(expfp);
+    expfp = NULL;
   }
-  if (listfile) fclose(listfp);
+  if (listfile) {
+    fclose(listfp);
+    listfp = NULL;
+  }
 }
 
 Ending ReadFile() {
@@ -494,6 +500,7 @@ int ReadFileToStringLst(stringlst *&f,char *end) {
 void WriteExp(char *n, aint v) {
   char lnrs[16],*l=lnrs;
   if (!expfp) {
+    if (relocpass) return;
     if (!(expfp=fopen(expfilename,"w"))) {
       cout << "Error opening file: " << expfilename << endl; exit(1); }
   }

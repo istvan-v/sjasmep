@@ -38,7 +38,7 @@ extern aint eadres,epadres;
 void OpenDest(int);
 void NewDest(char *ndestfilename, int mode);
 int FileExists(char* filename);
-void error(char*,char*,int=PASS2);
+void error(const char*,const char*,int=PASS2);
 void ListFile();
 void ListFileSkip(char*);
 void EmitByte(int byte);

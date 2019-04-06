@@ -385,6 +385,7 @@ void dirORG() {
 #ifdef SECTIONS
   if (section!=TEXT) { error(".org only allowed in text sections",0); *lp=0; return; }
 #endif
+  if (relocpass) error(".org not allowed in relocatable modules",0,FATAL);
   if (ParseExpression(lp,val)) adres=val; else error("Syntax error",0,CATCHALL);
 }
 
@@ -395,7 +396,10 @@ void dirHEADER() {
   if (section!=TEXT) { error("HEADER only allowed in text sections",0); *lp=0; return; }
 #endif
   if (!ParseExpression(lp,val)) error("Syntax error",0,CATCHALL);
-  if (val<5 || val>6) error("Invalid or unsupported HEADER type",0,FATAL);
+  if ((val<4 || val>7) && val!=2) error("Invalid or unsupported HEADER type",0,FATAL);
+  if (adres && !relocpass) error("HEADER not at the beginning of module",0,FATAL);
+  exoshdrtype = val;
+  if (val<5 || val>6) return;
   adres = (val!=6 ? 0x00f0 : 0xbffa);
   e[0] = int(val<<8);
   if (!comma(lp)) val=endadres;
@@ -603,6 +607,7 @@ void dirOUTPUT() {
 #ifdef SECTIONS
   if (section!=TEXT) error(".output only allowed in text sections",0,FATAL);
 #endif
+  if (relocpass) error(".output not allowed in relocatable modules",0,FATAL);
   fnaam=getfilename(lp); if (fnaam[0]=='<') fnaam++;
   int mode=OUTPUT_TRUNCATE;
   if(comma(lp))
@@ -762,6 +767,7 @@ void dirSTRUCT() {
 void dirFORG() {
   aint val;
   int method=SEEK_SET;
+  if (relocpass) error(".fpos not allowed in relocatable modules",0,FATAL);
   skipblanks(lp);
   if((*lp=='+') || (*lp=='-')) method=SEEK_CUR;
   if (!ParseExpression(lp,val)) error("Syntax error",0,CATCHALL);
