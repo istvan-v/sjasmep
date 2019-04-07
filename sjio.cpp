@@ -484,7 +484,7 @@ int ReadLine() {
   return 1;
 }
 
-int ReadFileToStringLst(stringlst *&f,char *end) {
+int ReadFileToStringLst(stringlst *&f,const char *end) {
   stringlst *s,*l=NULL;
   char *p; f=NULL;
   while ('o') {
@@ -501,7 +501,7 @@ int ReadFileToStringLst(stringlst *&f,char *end) {
   }
 }
 
-void WriteExp(char *n, aint v) {
+void WriteExp(const char *n, aint v) {
   char lnrs[16],*l=lnrs;
   if (!expfp) {
     if (relocpass) return;

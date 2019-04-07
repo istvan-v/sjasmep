@@ -49,7 +49,7 @@ void (*piCPUp)(void);
 sections section;
 #endif
 
-char *modlabp,*vorlabp,*macrolabp;
+char *modlabp,*vorlabp=0,*macrolabp;
 
 stringlst *lijstp;
 labtabcls labtab;
@@ -76,7 +76,7 @@ void InitPass(int p) {
   if (maxlin>9999) reglenwidth=5;
   if (maxlin>99999) reglenwidth=6;
   if (maxlin>999999) reglenwidth=7;
-  modlabp=0; vorlabp="_"; macrolabp=0; listmacro=0;
+  modlabp=0; vorlabp=strdup("_"); macrolabp=0; listmacro=0;
   pass=p; adres=mapadr=0; running=1; gcurlin=lcurlin=curlin=0;
   eadres=0; epadres=0; macronummer=0; lijst=0; comlin=0;
   modlstp=0;
@@ -90,7 +90,8 @@ void InitPass(int p) {
 }
 
 void getOptions(char **&argv,int &i) {
-  char *p,c;
+  const char *p;
+  char c;
   while (argv[i] && *argv[i]=='-') {
     p=argv[i++]+1;
     do {
@@ -103,7 +104,7 @@ void getOptions(char **&argv,int &i) {
       case 'd':
       case 'e':
         {
-          char    *value = (char *) strchr(p, '=');
+          const char  *value = strchr(p, '=');
           char    *endp = (char *) p;
           if (!value)
             value = "1";

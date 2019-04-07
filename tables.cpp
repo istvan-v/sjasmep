@@ -63,8 +63,9 @@ char *MaakLabNaam(char *naam) {
     }
     if (l) {
       strcat(lp,vorlabp); strcat(lp,".");
-    } else
-      vorlabp=strdup(naam);
+    } else {
+      free(vorlabp); vorlabp=strdup(naam);
+    }
   }
   strcat(lp,naam);
   return label;
@@ -251,7 +252,7 @@ funtabcls::funtabcls() {
   nextlocation=1;
 }
 
-int funtabcls::insert(char *nname, void(*nfunp)(void)) {
+int funtabcls::insert(const char *nname, void(*nfunp)(void)) {
   char *p;
   if (nextlocation>=FUNTABSIZE*2/3) { cout << "funtab full" << endl; exit(1); }
   int tr,htr;
@@ -281,13 +282,13 @@ int funtabcls::insert(char *nname, void(*nfunp)(void)) {
   return 1;
 }
 
-int funtabcls::insertd(char *nname, void(*nfunp)(void)) {
+int funtabcls::insertd(const char *nname, void(*nfunp)(void)) {
   char *buf=new char[strlen(nname)+2];
   strcpy(buf,nname); if (!insert(buf,nfunp)) return 0;
   strcpy(buf+1,nname); buf[0]='.'; return insert(buf,nfunp);
 }
 
-int funtabcls::zoek(char *nname) {
+int funtabcls::zoek(const char *nname) {
   int tr,htr,otr;
   otr=tr=hash(nname);
   while ((htr=hashtable[tr]) != 0) {
@@ -300,8 +301,8 @@ int funtabcls::zoek(char *nname) {
   return 0;
 }
 
-int funtabcls::hash(char* s) {
-  char* ss=s;
+int funtabcls::hash(const char* s) {
+  const char* ss=s;
   unsigned int h=0;
   for (;*ss!='\0';ss++) {
     h=(h<<3)+ *ss;
@@ -337,11 +338,11 @@ aint loklabtabcls::zoekb(aint nnum) {
   return (aint)-1;
 }
 
-definetabentrycls::definetabentrycls(char *nnaam,char *nvervanger, definetabentrycls *nnext) {
+definetabentrycls::definetabentrycls(const char *nnaam,const char *nvervanger, definetabentrycls *nnext) {
   char *s1, *s2;
   naam=strdup(nnaam);
   vervanger=new char[strlen(nvervanger)+1];
-  s1=vervanger; s2=nvervanger; skipblanks(s2);
+  s1=vervanger; s2=(char *) nvervanger; skipblanks(s2);
   while (*s2 && *s2!='\n' && *s2!='\r') { *s1=*s2; ++s1; ++s2; } *s1=0;
   next=nnext;
 }
@@ -350,13 +351,13 @@ void definetabcls::init() {
   for (int i=0; i<128; defs[i++]=0);
 }
 
-void definetabcls::add(char *naam, char *vervanger) {
+void definetabcls::add(const char *naam, const char *vervanger) {
   if (bestaat(naam)) error("Duplicate define",naam,ALL);
-  defs[*naam]=new definetabentrycls(naam,vervanger,defs[*naam]);
+  defs[(unsigned char) *naam]=new definetabentrycls(naam,vervanger,defs[(unsigned char) *naam]);
 }
 
-char *definetabcls::getverv(char *naam) {
-  definetabentrycls *p=defs[*naam];
+char *definetabcls::getverv(const char *naam) {
+  definetabentrycls *p=defs[(unsigned char) *naam];
   while (p) {
     if (!strcmp(naam,p->naam)) return p->vervanger;
     p=p->next;
@@ -364,8 +365,8 @@ char *definetabcls::getverv(char *naam) {
   return NULL;
 }
 
-int definetabcls::bestaat(char *naam) {
-  definetabentrycls *p=defs[*naam];
+int definetabcls::bestaat(const char *naam) {
+  definetabentrycls *p=defs[(unsigned char) *naam];
   while (p) {
     if (!strcmp(naam,p->naam)) return 1;
     p=p->next;
@@ -378,9 +379,9 @@ void macdefinetabcls::init() {
   for (int i=0; i<128; used[i++]=0);
 }
 
-void macdefinetabcls::macroadd(char *naam, char *vervanger) {
+void macdefinetabcls::macroadd(const char *naam, const char *vervanger) {
   defs=new definetabentrycls(naam,vervanger,defs);
-  used[*naam]=1;
+  used[(unsigned char) *naam]=1;
 }
 
 definetabentrycls *macdefinetabcls::getdefs() {
@@ -391,9 +392,9 @@ void macdefinetabcls::setdefs(definetabentrycls *ndefs) {
   defs=ndefs;
 }
 
-char *macdefinetabcls::getverv(char *naam) {
+char *macdefinetabcls::getverv(const char *naam) {
   definetabentrycls *p=defs;
-  if (!used[*naam]) return NULL;
+  if (!used[(unsigned char) *naam]) return NULL;
   while (p) {
     if (!strcmp(naam,p->naam)) return p->vervanger;
     p=p->next;
@@ -401,9 +402,9 @@ char *macdefinetabcls::getverv(char *naam) {
   return NULL;
 }
 
-int macdefinetabcls::bestaat(char *naam) {
+int macdefinetabcls::bestaat(const char *naam) {
   definetabentrycls *p=defs;
-  if (!used[*naam]) return 0;
+  if (!used[(unsigned char) *naam]) return 0;
   while (p) {
     if (!strcmp(naam,p->naam)) return 1;
     p=p->next;
@@ -425,9 +426,9 @@ void macrotabcls::init() {
   for (int i=0; i<128; used[i++]=0);
 }
 
-int macrotabcls::bestaat(char *naam) {
+int macrotabcls::bestaat(const char *naam) {
   macrotabentrycls *p=macs;
-  if (!used[*naam]) return 0;
+  if (!used[(unsigned char) *naam]) return 0;
   while (p) {
     if (!strcmp(naam,p->naam)) return 1;
     p=p->next;
@@ -440,7 +441,7 @@ void macrotabcls::add(char *nnaam,char *&p) {
   stringlst *s,*l=NULL,*f=NULL;
   if (bestaat(nnaam)) error("Duplicate macroname",0,PASS1);
   macs=new macrotabentrycls(nnaam,macs);
-  used[*nnaam]=1;
+  used[(unsigned char) *nnaam]=1;
   skipblanks(p);
   while (*p) {
     if (!(n=getid(p))) { error("Illegal macro argument",p,PASS1); break; }
@@ -459,7 +460,7 @@ int macrotabcls::emit(char *naam, char *&p) {
   macrotabentrycls *m=macs;
   definetabentrycls *odefs;
   int olistmacro,olijst;
-  if (!used[*naam]) return 0;
+  if (!used[(unsigned char) *naam]) return 0;
   while (m) {
     if (!strcmp(naam,m->naam)) break;
     m=m->next;
@@ -505,7 +506,7 @@ int macrotabcls::emit(char *naam, char *&p) {
   listmacro=olistmacro; donotlist=1; return 0;
 }
 
-structmembncls::structmembncls(char *nnaam, aint noffset) {
+structmembncls::structmembncls(const char *nnaam, aint noffset) {
   next=0; naam=strdup(nnaam); offset=noffset;
 }
 
@@ -513,12 +514,12 @@ structmembicls::structmembicls(aint noffset,aint nlen,aint ndef,structmembs nsoo
   next=0; offset=noffset; len=nlen; def=ndef; soort=nsoort;
 }
 
-structcls::structcls(char *nnaam,char *nid,int idx,int no,int ngl,structcls *p) {
+structcls::structcls(const char *nnaam,const char *nid,int idx,int no,int ngl,structcls *p) {
   mnf=mnl=0; mbf=mbl=0;
   naam=strdup(nnaam); id=strdup(nid); binding=idx; next=p; noffset=no; global=ngl;
 }
 
-void structcls::addlabel(char *nnaam) {
+void structcls::addlabel(const char *nnaam) {
   structmembncls *n=new structmembncls(nnaam,noffset);
   if (!mnf) mnf=n;
   if (mnl) mnl->next=n;
@@ -532,7 +533,7 @@ void structcls::addmemb(structmembicls *n) {
   noffset+=n->len;
 }
 
-void structcls::copylabel(char *nnaam, aint offset) {
+void structcls::copylabel(const char *nnaam, aint offset) {
   structmembncls *n=new structmembncls(nnaam,noffset+offset);
   if (!mnf) mnf=n;
   if (mnl) mnl->next=n;
@@ -608,7 +609,7 @@ void structcls::deflab() {
   }
 }
 
-void structcls::emitlab(char *iid) {
+void structcls::emitlab(const char *iid) {
   char ln[LINEMAX],sn[LINEMAX],*p,*op;
   aint oval;
   structmembncls *np=mnf;
@@ -681,36 +682,36 @@ void structtabcls::init() {
   for (int i=0; i<128; strs[i++]=0);
 }
 
-structcls* structtabcls::add(char *naam,int no,int idx,int gl) {
+structcls* structtabcls::add(const char *naam,int no,int idx,int gl) {
   char sn[LINEMAX],*sp;
   sn[0]=0; if (!gl && modlabp) { strcpy(sn,modlabp); strcat(sn,"."); }
   sp=strcat(sn,naam);
   if (bestaat(sp)) error("Duplicate structurename",naam,PASS1);
-  strs[*sp]=new structcls(naam,sp,idx,0,gl,strs[*sp]);
-  if (no) strs[*sp]->addmemb(new structmembicls(0,no,0,SMEMBBLOCK));
-  return strs[*sp];
+  strs[(unsigned char) *sp]=new structcls(naam,sp,idx,0,gl,strs[(unsigned char) *sp]);
+  if (no) strs[(unsigned char) *sp]->addmemb(new structmembicls(0,no,0,SMEMBBLOCK));
+  return strs[(unsigned char) *sp];
 }
 
-structcls *structtabcls::zoek(char *naam,int gl) {
+structcls *structtabcls::zoek(const char *naam,int gl) {
   char sn[LINEMAX],*sp;
   sn[0]=0; if (!gl && modlabp) { strcpy(sn,modlabp); strcat(sn,"."); }
   sp=strcat(sn,naam);
-  structcls *p=strs[*sp];
+  structcls *p=strs[(unsigned char) *sp];
   while (p) { if (!strcmp(sp,p->id)) return p; p=p->next; }
   if (!gl && modlabp) {
-    sp+=1+strlen(modlabp); p=strs[*sp];
+    sp+=1+strlen(modlabp); p=strs[(unsigned char) *sp];
     while (p) { if (!strcmp(sp,p->id)) return p; p=p->next; }
   }
   return 0;
 }
 
-int structtabcls::bestaat(char *naam) {
-  structcls *p=strs[*naam];
+int structtabcls::bestaat(const char *naam) {
+  structcls *p=strs[(unsigned char) *naam];
   while (p) { if (!strcmp(naam,p->naam)) return 1; p=p->next; }
   return 0;
 }
 
-int structtabcls::emit(char *naam, char *l, char *&p, int gl) {
+int structtabcls::emit(const char *naam, const char *l, char *&p, int gl) {
   structcls *st=zoek(naam,gl);
   if (!st) return 0;
   if (l) st->emitlab(l);

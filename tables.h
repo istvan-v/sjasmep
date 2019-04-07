@@ -64,13 +64,13 @@ public:
 class funtabcls {
 public:
   funtabcls();
-  int insert(char*,void(*)(void));
-  int insertd(char*,void(*)(void));
-  int zoek(char*);
+  int insert(const char*,void(*)(void));
+  int insertd(const char*,void(*)(void));
+  int zoek(const char*);
 private:
   int hashtable[FUNTABSIZE],nextlocation;
   funtabentrycls funtab[FUNTABSIZE];
-  int hash(char*);
+  int hash(const char*);
 };
 
 class loklabtabentrycls {
@@ -94,15 +94,15 @@ class definetabentrycls {
 public:
   char *naam, *vervanger;
   definetabentrycls *next;
-  definetabentrycls(char*,char*,definetabentrycls*);
+  definetabentrycls(const char*,const char*,definetabentrycls*);
 };
 
 class definetabcls {
 public:
   void init();
-  void add(char*,char*);
-  char *getverv(char*);
-  int bestaat(char*);
+  void add(const char*,const char*);
+  char *getverv(const char*);
+  int bestaat(const char*);
   definetabcls() { init(); }
 private:
   definetabentrycls *defs[128];
@@ -111,11 +111,11 @@ private:
 class macdefinetabcls {
 public:
   void init();
-  void macroadd(char*,char*);
+  void macroadd(const char*,const char*);
   definetabentrycls *getdefs();
   void setdefs(definetabentrycls *);
-  char *getverv(char*);
-  int bestaat(char*);
+  char *getverv(const char*);
+  int bestaat(const char*);
   macdefinetabcls() { init(); }
 private:
   int used[128];
@@ -150,7 +150,7 @@ class macrotabcls {
 public:
   void add(char*,char*&);
   int emit(char*,char*&);
-  int bestaat(char*);
+  int bestaat(const char*);
   void init();
   macrotabcls() { init(); }
 private:
@@ -163,7 +163,7 @@ public:
   char *naam;
   aint offset;
   structmembncls *next;
-  structmembncls(char*,aint);
+  structmembncls(const char*,aint);
 };
 
 class structmembicls {
@@ -180,17 +180,17 @@ public:
   int binding;
   int global;
   aint noffset;
-  void addlabel(char*);
+  void addlabel(const char*);
   void addmemb(structmembicls*);
-  void copylabel(char*,aint);
+  void copylabel(const char*,aint);
   void cpylabels(structcls*);
   void copymemb(structmembicls*,aint);
   void cpymembs(structcls*,char*&);
   void deflab();
-  void emitlab(char*);
+  void emitlab(const char*);
   void emitmembs(char*&);
   structcls *next;
-  structcls(char*,char*,int,int,int,structcls*);
+  structcls(const char*,const char*,int,int,int,structcls*);
 private:
   structmembncls *mnf,*mnl;
   structmembicls *mbf,*mbl;
@@ -198,12 +198,12 @@ private:
 
 class structtabcls {
 public:
-  structcls* add(char*,int,int,int);
+  structcls* add(const char*,int,int,int);
   void init();
   structtabcls() { init(); }
-  structcls *zoek(char*,int);
-  int bestaat(char*);
-  int emit(char*,char*,char*&,int);
+  structcls *zoek(const char*,int);
+  int bestaat(const char*);
+  int emit(const char*,const char*,char*&,int);
 private:
   structcls *strs[128];
 };
@@ -239,8 +239,8 @@ public:
 class pooltabcls {
 public:
   pooltabcls();
-  void add(char*);
-  void addlabel(char*);
+  void add(const char*);
+  void addlabel(const char*);
   void emit();
 private:
   pooltabentrycls *first,*last;

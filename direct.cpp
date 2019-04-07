@@ -706,8 +706,8 @@ void dirEXPORT() {
   if (pass==1) return;
   if (!(n=p=getid(lp))) { error("Syntax error",lp,CATCHALL); return; }
   labelnotfound=0;
-    getLabelValue(n,val); if (labelnotfound) { error("Label not found",p,SUPPRES); return; }
-    WriteExp(p,val);
+  getLabelValue(n,val); if (labelnotfound) { error("Label not found",p,SUPPRES); return; }
+  WriteExp(p,val);
 }
 
 void dirMACRO() {

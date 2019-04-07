@@ -1,5 +1,5 @@
 
-CXXFLAGS = -Wall -Wno-write-strings -Wno-char-subscripts -O2
+CXXFLAGS = -Wall -O2
 ifneq ($(findstring mingw,$(MAKE_HOST)),)
 	CXX = g++.exe
 	CXXFLAGS += -DMINGW

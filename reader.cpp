@@ -28,7 +28,7 @@
 
 #include "sjasm.h"
 
-int cmphstr(char *&p1, char *p2) {
+int cmphstr(char *&p1, const char *p2) {
   int i=0;
   if (isupper(*p1))
     while (p2[i]) {
@@ -166,7 +166,7 @@ int need(char *&p, char c) {
   ++p; return 1;
 }
 
-int needa(char *&p, char *c1, int r1, char *c2, int r2, char *c3, int r3) {
+int needa(char *&p, const char *c1, int r1, const char *c2, int r2, const char *c3, int r3) {
 //  skipblanks(p);
   if (!isalpha(*p)) return 0;
   if (cmphstr(p,c1)) return r1;
@@ -175,7 +175,7 @@ int needa(char *&p, char *c1, int r1, char *c2, int r2, char *c3, int r3) {
   return 0;
 }
 
-int need(char *&p, char *c) {
+int need(char *&p, const char *c) {
   skipblanks(p);
   while (*c) {
     if (*p!=*c) { c+=2; continue; }

@@ -56,8 +56,8 @@ Ending ReadFile();
 Ending SkipFile();
 void NewDest(char *ndestfilename);
 void SeekDest(long,int);
-int ReadFileToStringLst(stringlst *&f,char *end);
-void WriteExp(char *n, aint v);
+int ReadFileToStringLst(stringlst *&f,const char *end);
+void WriteExp(const char *n, aint v);
 void emitarm(aint data);
 #ifdef METARM
 void emitarmdataproc(int cond, int I,int opcode,int S,int Rn,int Rd,int Op2);
