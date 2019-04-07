@@ -636,7 +636,7 @@ void dirDEFINE() {
   }
   if (!cmphstr(p,"define")) error("define error",0,FATAL);
   if (!(id=getid(p))) { error("illegal define",0); return; }
-  if (pass==1) definetab.add(id,p);
+  if (pass==1 && !relocpass) definetab.add(id,p);
   while (*lp) ++lp;
 }
 

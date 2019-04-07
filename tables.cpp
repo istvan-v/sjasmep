@@ -351,7 +351,7 @@ void definetabcls::init() {
 }
 
 void definetabcls::add(char *naam, char *vervanger) {
-  if (bestaat(naam)) error("Duplicate define",naam);
+  if (bestaat(naam)) error("Duplicate define",naam,ALL);
   defs[*naam]=new definetabentrycls(naam,vervanger,defs[*naam]);
 }
 
