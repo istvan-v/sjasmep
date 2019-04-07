@@ -48,7 +48,7 @@ public:
   int zoek(const char*,aint&);
   void dump();
   void dumpsym();
-  void clear();
+  int setvalue(const char*,aint);
 private:
   int hashtable[LABTABSIZE],nextlocation;
   labtabentrycls labtab[LABTABSIZE];

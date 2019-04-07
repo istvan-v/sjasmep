@@ -238,13 +238,18 @@ void labtabcls::dumpsym() {
   fclose(symfp);
 }
 
-void labtabcls::clear() {
-  for (int i=0; i<LABTABSIZE; i++) hashtable[i]=0;
-  while (nextlocation>1) {
-    nextlocation--;
-    free(labtab[nextlocation].name); labtab[nextlocation].name=NULL;
-    labtab[nextlocation].value=labtab[nextlocation].used=0;
+int labtabcls::setvalue(const char *nname,aint nvalue) {
+  int tr,htr,otr;
+  otr=tr=hash(nname);
+  while ((htr=hashtable[tr]) != 0) {
+    if (!strcmp((labtab[htr].name),nname)) {
+      labtab[htr].value=nvalue; labtab[htr].used=-1; return 1;
+    }
+    if (++tr>=LABTABSIZE) tr=0;
+    if (tr==otr) break;
   }
+  labelnotfound=1;
+  return 0;
 }
 
 funtabcls::funtabcls() {

@@ -316,8 +316,11 @@ void ParseLabel() {
     if (pass==2) {
       if (!getLabelValue(ttp,oval)) error("Internal error. ParseLabel()",0,FATAL);
       if (val!=oval) error("Label has different value in pass 2",temp);
-    } else
+    } else if (relocpass) {
+      if (!labtab.setvalue(tp,val)) error("Internal error. ParseLabel()",0,FATAL);
+    } else {
       if (!labtab.insert(tp,val)) error("Duplicate label",tp,PASS1);
+    }
   }
 #ifdef SECTIONS
   break;

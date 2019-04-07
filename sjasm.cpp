@@ -218,7 +218,7 @@ void relocfile() {
   unsigned char *buf=0;
   size_t fsize;
   do {
-    relocpass=true; Close(); labtab.clear(); listfile=listdata=listmacro=0;
+    relocpass=true; Close(); listfile=listdata=listmacro=0;
     InitPass(1); adres=reloc_offs; OpenFile(sourcefilename);
     InitPass(2); adres=reloc_offs; OpenFile(sourcefilename);
     Close(); relocpass=false;
