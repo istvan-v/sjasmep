@@ -103,23 +103,20 @@ void getOptions(char **&argv,int &i) {
       case 'd':
       case 'e':
         {
-          char    *name = p;
           char    *value = (char *) strchr(p, '=');
-          char    *endp = (char *) 0;
-          if (!value) {
-            value = "1"; p = (char *) 0;
-          }
-          else {
-            name = (char *) malloc(value + 1 - p);
-            memcpy(name, p, value - p); name[value - p] = '\0';
-            value++; p = name;
-          }
+          char    *endp = (char *) p;
+          if (!value)
+            value = "1";
+          else
+            value++;
+          char    *name = getid(endp);
+          if (!name || (*endp != '\0' && *endp != '='))
+            error("Invalid name", p, FATAL);
           if (c == 'd')
             definetab.add(name, value);
           else if (!labtab.insert(name, strtol(value, &endp, 0)))
             error("Duplicate label", name, FATAL);
-          if (p)
-            free(p);
+          free(name);
           p = "";
         }
         break;
