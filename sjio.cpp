@@ -36,8 +36,8 @@
 
 int EB[1024*64],nEB=0;
 char destbuf[DESTBUFLEN];
-FILE *input, *output;
-FILE *listfp,*expfp=NULL;
+FILE *input, *output=NULL;
+FILE *listfp=NULL,*expfp=NULL;
 aint eadres,epadres,desttel=0,skiperrors=0;;
 char hd[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
@@ -49,12 +49,16 @@ void error(const char *fout,const char *bd,int soort) {
   if ((soort==CATCHALL || soort==SUPPRES || soort==PASS2) && pass!=2) return;
   skiperrors=(soort==SUPPRES);
   preverror=lcurlin;
-  ++nerror;
-  sprintf(ep,"%s line %lu: %s", filename, lcurlin, fout);
+  if (!lcurlin) {
+    soort=FATAL; strcpy(ep,fout);
+  } else {
+    ++nerror;
+    sprintf(ep,"%s line %lu: %s", filename, lcurlin, fout);
+  }
   if (bd) { strcat(ep,": "); strcat(ep,bd); }
   if (!strchr(ep,'\n')) strcat(ep,"\n");
-  if (listfile) fputs(eline,listfp);
-  cout << eline;
+  if (listfp) fputs(eline,listfp);
+  cerr << eline;
   if (soort==FATAL) {
     if (output) { fclose(output); remove(destfilename); }
     exit(1);
