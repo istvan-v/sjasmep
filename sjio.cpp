@@ -109,7 +109,8 @@ void printlcurlin(char *&p) {
 
 void printhex32(char *&p, aint h) {
   unsigned hh=h&0xffffffff;
-  *(p++)=hd[hh>>28]; hh&=0xfffffff;
+  if (hh>0xf0000000u) { *(p++)='-'; hh=-h&0xffffffff; }
+  else { *(p++)=hd[hh>>28]; hh&=0xfffffff; }
   *(p++)=hd[hh>>24]; hh&=0xffffff;
   *(p++)=hd[hh>>20]; hh&=0xfffff;
   *(p++)=hd[hh>>16]; hh&=0xffff;
