@@ -1,5 +1,5 @@
 
-CXXFLAGS = -Wall -O2
+CXXFLAGS = -Wall -O2 -fno-exceptions -fno-rtti
 ifneq ($(findstring mingw,$(MAKE_HOST)),)
 	CXX = g++.exe
 	CXXFLAGS += -DMINGW
