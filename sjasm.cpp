@@ -122,7 +122,7 @@ void getOptions(char **&argv,int &i) {
         }
         break;
       default:
-        cerr << "Unrecognised option: " << c << endl;
+        fprintf(stderr, "Unrecognised option: %c\n", int(c));
         break;
       }
     } while (*p);
@@ -136,19 +136,19 @@ int main(int argc, char *argv[]) {
   char *p;
   int i=1;
 
-  cout << "SjASM Z80 Assembler v0.39g6 - www.xl2s.tk" << endl;
+  printf("SjASM Z80 Assembler v0.39g6 - www.xl2s.tk\n");
   sourcefilename[0]=destfilename[0]=listfilename[0]=expfilename[0]=0;
   if (argc==1) {
-    cout << "Copyright 2006 Sjoerd Mastijn" << endl;
-    cout << "\nUsage:\nsjasm [-options] sourcefile [targetfile [listfile [exportfile]]]\n";
-    cout << "\nOption flags as follows:\n";
-    cout << "  -l        Label table in listing\n";
-    cout << "  -s        Generate .SYM symbol file\n";
-    cout << "  -q        No listing\n";
-    cout << "  -i<path>  Includepath\n";
-    cout << "  -Dname=value  Define identifier\n";
-    cout << "  -Ename=value  Define label\n";
-    exit(1);
+    printf("Copyright 2006 Sjoerd Mastijn\n");
+    printf("\nUsage:\nsjasm [-options] sourcefile [targetfile [listfile [exportfile]]]\n");
+    printf("\nOption flags as follows:\n");
+    printf("  -l        Label table in listing\n");
+    printf("  -s        Generate .SYM symbol file\n");
+    printf("  -q        No listing\n");
+    printf("  -i<path>  Includepath\n");
+    printf("  -Dname=value  Define identifier\n");
+    printf("  -Ename=value  Define label\n");
+    return 1;
   }
 
   GetCurrentDirectory(MAX_PATH,zoekpad);
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
   getOptions(argv,i); if (argv[i]) strcpy(expfilename,argv[i++]);
   getOptions(argv,i);
 
-  if (!sourcefilename[0]) { cout << "No inputfile" << endl; exit(1); }
+  if (!sourcefilename[0]) error("No inputfile",0,FATAL);
   if (!destfilename[0]) {
     strcpy(destfilename,sourcefilename);
     if (!(p=strchr(destfilename,'.'))) p=destfilename; else *p=0;
@@ -188,13 +188,13 @@ int main(int argc, char *argv[]) {
 
   InitPass(1); OpenList(); OpenFile(sourcefilename); endadres=adres;
 
-  cout << "Pass 1 complete (" << nerror << " errors)" << endl;
+  printf("Pass 1 complete (%d errors)\n", nerror);
 
   InitPass(2); OpenDest(); OpenFile(sourcefilename);
 
   if (labellisting) labtab.dump();
 
-  cout << "Pass 2 complete" << endl;
+  printf("Pass 2 complete\n");
 
   if (exoshdrtype && (exoshdrtype<5 || exoshdrtype>6) && !nerror) relocfile();
 
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
   if (nerror) remove(destfilename);
   else if (symfile) labtab.dumpsym();
 
-  cout << "Errors: " << nerror << endl << flush;
+  printf("Errors: %d\n", nerror); fflush(stdout);
 
   return (nerror!=0);
 }

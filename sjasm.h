@@ -37,11 +37,6 @@
 #else
 #include "loose.h"
 #endif
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::flush;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
