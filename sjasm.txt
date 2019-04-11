@@ -418,7 +418,7 @@ DP2, DP4, DP16
 Define pixels in Enterprise and Amstrad CPC 2, 4, or 16 color format.
 
   DP2  0,1,1,0,1,0,0,1  ; same as BYTE 69H
-  DP4  0,1,2,3          ; same as BYTE 53H
+  DP4  "0123"           ; same as BYTE 53H
   DP16 5,10             ; same as BYTE 0A5H
 
 DD
@@ -550,6 +550,14 @@ To include a binary file into the outputfile. The offset and length are optional
   INCBIN "gfx.scc",7        ; include gfx.scc, skip first 7 bytes
   INCBIN "rantab.com",3,256 ; include 256 bytes from offset 3
   INCBIN gfx.scc ,7         ; note the space between the filename and the ',7' here :)
+
+FSIZE <filename>[,labelname]
+-----
+Get the size of a binary file.
+
+  FSIZE "file.bin"          ; same as DW filesize
+  FSIZE "file.bin",Label    ; same as Label EQU filesize, -1 if open failed
+  FSIZE "file.bin",BC       ; same as LD BC,filesize
 
 INCLUDE <filename>
 -------
