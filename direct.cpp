@@ -317,7 +317,7 @@ void dirDWORD() {
   while (*lp) {
     if (ParseExpression(lp,val)) {
       if (teller>127) error("Over 128 values in .dword",0,FATAL);
-      e[teller*2]=val & 65535; e[teller*2+1]=val >> 16; ++teller;
+      e[teller*2]=val & 65535; e[teller*2+1]=(unsigned int)val >> 16; ++teller;
     } else { error("Syntax error",lp,CATCHALL); return; }
     skipblanks();
     if (*lp!=',') break;
