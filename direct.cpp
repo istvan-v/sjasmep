@@ -544,7 +544,7 @@ void dirINCBIN() {
 void dirFSIZE() {
   char *fnaam;
   long fsize=-1;
-  int e[4];
+  int e[5];
 #ifdef SECTIONS
   if (section!=TEXT) error(".fsize only allowed in text sections",0,FATAL);
 #endif
@@ -556,31 +556,27 @@ void dirFSIZE() {
       fclose(f);
     }
   }
-  e[0]=0;
+  e[0]=2;
   if (comma(lp)) {
-    e[0]=-1;
+    e[0]=0;
     char *lnaam=getid(lp);
     if (lnaam) {
       char *lnaam2=lnaam;
-      if (cmphstr(lnaam2,"bc"))
-        e[0]=0x01;
-      else if (cmphstr(lnaam2,"de"))
-        e[0]=0x11;
-      else if (cmphstr(lnaam2,"hl"))
-        e[0]=0x21;
-      else if (cmphstr(lnaam2,"sp"))
-        e[0]=0x31;
-      else if ((lnaam2=MaakLabNaam(lnaam))!=(char *)0) {
-        if (!labtab.insert(lnaam2,aint(fsize))) error("Duplicate label",lnaam2,PASS1);
-        delete[] lnaam2;
+      if ((e[0]=needa(lnaam2,"bc",0x01,"de",0x11,"hl",0x21))==0 &&
+          (e[0]=needa(lnaam2,"sp",0x31,"ix",0xdd,"iy",0xfd))==0) {
+        if ((lnaam2=MaakLabNaam(lnaam))!=(char *)0) {
+          if (!labtab.insert(lnaam2,aint(fsize)) && !relocpass)
+            error("Duplicate label",lnaam2,PASS1);
+          delete[] lnaam2;
+        }
       }
       free(lnaam);
     }
   }
-  if (e[0]>=0) {
+  if (e[0]!=0) {
     if (fsize<0) error("Error opening file",fnaam,FATAL);
-    int i=e[0]&1;
-    e[i]=fsize&0xff; e[i+1]=(fsize>>8)&0xff; e[i+2]=-1;
+    int i=(e[0]&1)+int(bool(e[0]&0x80));
+    e[1]=0x21; e[i]=fsize&0xff; e[i+1]=(fsize>>8)&0xff; e[i+2]=-1;
     EmitBytes(e);
     if (fsize>0xffff) error("Bytes lost",0);
   }
