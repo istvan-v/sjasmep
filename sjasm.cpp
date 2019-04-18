@@ -226,7 +226,7 @@ void relocfile() {
       error("Error reopening output file",0,FATAL);
     if (size!=-1) endadres=int(size>>1);
     fsize=size_t(destlen);
-    if (fsize<2 || fsize>(0xe380<<1) || fsize!=(size_t(endadres)<<1))
+    if (fsize<2 || fsize>(0xe380<<1) || endadres<1 || endadres>0xe380)
       error("Invalid relocatable module size",0,FATAL);
     if (!(buf = (unsigned char *) malloc((fsize*3+64)*sizeof(unsigned char))))
       error("Error allocating memory",0,FATAL);
