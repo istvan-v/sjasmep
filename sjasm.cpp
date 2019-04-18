@@ -224,11 +224,9 @@ void relocfile() {
     Close(); relocpass=false;
     if (!(output=freopen(destfilename,"rb",output)))
       error("Error reopening output file",0,FATAL);
-    if (fseek(output,0,SEEK_END)<0 || long(fsize=size_t(ftell(output)))<0 ||
-        fseek(output,0,SEEK_SET)<0) {
-      error("Error seeking output file",0,FATAL); return;
-    }
-    if (fsize<2 || fsize>(0xe380<<1) || endadres<1 || endadres>0xe380)
+    if (size!=-1) endadres=int(size>>1);
+    fsize=size_t(destlen);
+    if (fsize<2 || fsize>(0xe380<<1) || fsize!=(size_t(endadres)<<1))
       error("Invalid relocatable module size",0,FATAL);
     if (!(buf = (unsigned char *) malloc((fsize*3+64)*sizeof(unsigned char))))
       error("Error allocating memory",0,FATAL);

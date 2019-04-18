@@ -402,7 +402,7 @@ void dirHEADER() {
   if (val<5 || val>6) return;
   adres = (val!=6 ? 0x00f0 : 0xbffa);
   e[0] = int(val<<8);
-  if (!comma(lp)) val=endadres;
+  if (!comma(lp)) val=(size==-1 ? aint(endadres):(size+adres));
   else ParseExpression(lp,val);
   e[1] = int(val-(adres+16)); check16(e[1]);
   if (e[1]>(adres<0x8000 ? 0xbf00 : 0x3ff6)) error("Bytes lost",0);
@@ -434,15 +434,10 @@ void dirENDMAP() {
 void dirALIGN() {
   aint val;
   if (!ParseExpression(lp,val)) val=4;
-  switch (val) {
-  case 1: break;
-  case 2: case 4: case 8: case 16: case 32: case 64: case 128: case 256:
-  case 512: case 1024: case 2048: case 4096: case 8192: case 16384: case 32768:
+  if (val<1 || val>32768 || (val&(val-1))!=0) error("Illegal align",0);
+  else {
     val=(~adres+1)&(val-1);
     EmitBlock(0,val);
-    break;
-  default:
-    error("Illegal align",0); break;
   }
 }
 
@@ -514,7 +509,8 @@ void dirSIZE() {
 #endif
   if (!ParseExpression(lp,val)) { error("Syntax error",bp,CATCHALL); return; }
   if (pass==2) return;
-  if (size!=(aint)-1) { error("Multiple sizes?",0); return; }
+  if (relocpass) val=val<<1;
+  else if (size!=(aint)-1) { error("Multiple sizes?",0,PASS1); return; }
   size=val;
 }
 
