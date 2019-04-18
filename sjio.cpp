@@ -368,8 +368,8 @@ void CloseDest() {
         while (pad--) {
           destbuf[desttel++]=0;
           if (desttel==256) WriteDest();
-      }
-    if (desttel) WriteDest();
+        }
+      if (desttel) WriteDest();
     }
   }
   if (!relocpass) fclose(output);
